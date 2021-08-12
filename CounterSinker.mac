@@ -1,0 +1,43 @@
+! CounterSinker v1.0
+! Revolves a right triangle with the given dimensions in order to subtract a countersink from the original solid.
+! Usage: Select a point(s) on center of the hole(s) at top of surface and the solid. Then run the macro.
+! To do: 
+! Add a dialog box and make it all pretty like.
+! Any bugs, please submit to rickkayo+gibbscam@gmail.com
+! - Rick
+DEGREES
+GET_SELECTED_SOLID_LIST
+sol1 = first_solid_ref
+GET_NUM_FEAT_SELECTED featSelected
+input "Diameter of Csink", a
+input "Included angle (90, 82, 120, etc)", c
+b = a/2
+d = c/2
+g = b/tan(d)
+get_cs_list
+GET_SELECTION_LIST 1
+for i=1 to featSelected
+	GET_SELECTED_GEO_REF i, p1
+	GET_FEAT_START p1, 0, x1, y1, z1
+	new_cs XZ, "CS For Point", x1, y1, z1
+	csPoint = CsNumber
+	set_cs csPoint
+	GET_FEAT_START p1, 1, x1, y1, z1
+	CONTOUR [
+		START x1,y1
+		LINE b,y1
+		LINE x1,-g
+		]
+	SELECT_SHAPE ContourRef
+	REVOLVE v, x1, 360
+	sol2=SolidRef
+	solid_subtract sol1, sol2
+	delete_shape ContourRef
+	set_selection_list 1
+	select_solid SolidRef
+	sol1=SolidRef
+	set_cs 1
+	delete_cs csPoint
+next i
+deselect_all_geo
+deselect_all_solids
